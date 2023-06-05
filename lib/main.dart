@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:travelplanner/Pages/login.dart';
 import 'package:travelplanner/Pages/mainpage.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   await Firebase.initializeApp(
