@@ -117,7 +117,9 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {});
         final credential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: _email, password: _password);
-        setState(() {});
+        setState(() {
+          print(credential);
+        });
 
         Navigator.pushNamed(context, '/TravelForm');
       } on FirebaseAuthException catch (e) {

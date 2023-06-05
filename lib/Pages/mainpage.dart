@@ -1,4 +1,7 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
+import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 
 class TravelForm extends StatefulWidget {
   get onChanged => null;
@@ -10,10 +13,17 @@ class TravelForm extends StatefulWidget {
 
 class _TravelFormState extends State<TravelForm> {
   final _formKey = GlobalKey<FormState>();
+  bool loading = false;
   String _destination = '';
   String _duration = '';
-  String _response = '';
+  // String _response = '';
   double _value = 1;
+  String budgetText = '';
+  ChatCTResponse? responseFuture;
+  final openAI = OpenAI.instance.build(
+      token: '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',
+      baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 5)),
+      enableLog: true);
 
   // Create a ScrollController to control the scrolling of the ListView
   final ScrollController _scrollController = ScrollController();
@@ -122,7 +132,7 @@ class _TravelFormState extends State<TravelForm> {
                   child: ElevatedButton(
                     onPressed: _submitForm,
                     child: Text(
-                      'SUBMIT',
+                      loading ? 'Loading...' : 'SUBMIT',
                       style: TextStyle(fontSize: 16.0),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -134,35 +144,7 @@ class _TravelFormState extends State<TravelForm> {
                   ),
                 ),
                 SizedBox(height: 32.0),
-                Visibility(
-                  visible: _response.isNotEmpty,
-                  child: Container(
-                    // height: MediaQuery.of(context).size.height * 1,
-                    // width: MediaQuery.of(context).size.width * 1,
-                    child: Expanded(
-                      // Wrap the Text widget inside a ListView widget
-                      child: ListView(
-                          controller: _scrollController, // Set the controller
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16.0),
-                                color: Colors.grey[800],
-                              ),
-                              child: Text(
-                                _response,
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ]),
-                    ),
-                  ),
-                ),
+                _resultCard(MediaQuery.of(context).size),
               ],
             ),
           ),
@@ -184,16 +166,20 @@ class _TravelFormState extends State<TravelForm> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     final form = _formKey.currentState;
     if (form!.validate()) {
       form.save();
       // TODO: Implement response logic based on the entered destination and duration
-      setState(() {
-        _response =
-            'You are traveling to $_destination for $_duration. Have a safe trip! \n\n day 1 goa beach \n day 2 goa pub \n day 3 malgoa ';
-      });
-
+      budgetText = _getValueText();
+      chatComplete(_destination, _duration, budgetText, '');
+      // setState(() {
+      //   loading = true;
+      // });
+      //await Future.delayed(Duration(seconds: 40));
+      // setState(() {
+      //   // loading = false;
+      // });
       // Scroll to the bottom of the screen to show the response
       Future.delayed(Duration(milliseconds: 500), () {
         _scrollController.animateTo(
@@ -202,6 +188,60 @@ class _TravelFormState extends State<TravelForm> {
           curve: Curves.easeInOut,
         );
       });
+      setState(() {});
     }
+  }
+
+  void chatComplete(String destination, String duration, String budget,
+      String sponsors) async {
+    final request = ChatCompleteText(messages: [
+      Map.of({
+        "role": "user",
+        "content":
+            'Consider yourself a travel planner. write a travel itinerary to $destination for the duration of $duration with a $budget budget.[$sponsors] These are the list of sponsors if any include them in the itinerary. And make sure you have the itinerary only.'
+      })
+    ], maxToken: 200, model: ChatModel.gptTurbo0301);
+
+    responseFuture = await openAI.onChatCompletion(request: request);
+    for (var element in responseFuture!.choices) {
+      print("data -> ${element.message?.content}");
+    }
+  }
+
+  Widget _resultCard(Size size) {
+    return FutureBuilder<ChatCTResponse?>(
+        future: Future(() => responseFuture),
+        builder: (context, snapshot) {
+          final text = snapshot.data?.choices.last.message?.content;
+          return Visibility(
+            visible: text.isNull ? false : true,
+            child: Container(
+              // height: MediaQuery.of(context).size.height * 1,
+              // width: MediaQuery.of(context).size.width * 1,
+              child: Expanded(
+                // Wrap the Text widget inside a ListView widget
+                child: ListView(
+                    controller: _scrollController, // Set the controller
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16.0),
+                          color: Colors.grey[800],
+                        ),
+                        child: Text(
+                          text ?? 'Loading...',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ]),
+              ),
+            ),
+          );
+        });
   }
 }
