@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_auth: ^4.4.2
-  chat_gpt_sdk: ^2.1.7
+  chat_gpt_flutter: ^1.0.11
 
 
 dev_dependencies:

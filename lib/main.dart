@@ -4,12 +4,10 @@ import 'package:travelplanner/Pages/mainpage.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
-  await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: "AIzaSyAV8ed1n73-dGIa7krpZ0eCOhv4J1Uu718",
-          appId: "1:926709981503:web:249359d069915e01e2f38a",
-          messagingSenderId: "926709981503",
-          projectId: "genesis-82adf"));
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
+
   runApp(const MainApp());
 }
 
@@ -23,10 +21,10 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginPage(),
+      home: const LoginPage(),
       //home: TravelForm(),
       routes: {
-        TravelForm.route: (context) => TravelForm(),
+        TravelForm.route: (context) => const TravelForm(),
       },
     );
   }

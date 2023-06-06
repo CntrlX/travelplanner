@@ -1,9 +1,10 @@
-import 'dart:js_interop';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
+import 'package:chat_gpt_flutter/chat_gpt_flutter.dart';
 
 class TravelForm extends StatefulWidget {
+  const TravelForm({super.key});
+
   get onChanged => null;
   static String route = '/TravelForm';
 
@@ -13,17 +14,16 @@ class TravelForm extends StatefulWidget {
 
 class _TravelFormState extends State<TravelForm> {
   final _formKey = GlobalKey<FormState>();
-  bool loading = false;
+  bool loading = true;
   String _destination = '';
+  String _from = '';
   String _duration = '';
   // String _response = '';
+  final chatGpt =
+      ChatGpt(apiKey: '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');
   double _value = 1;
   String budgetText = '';
-  ChatCTResponse? responseFuture;
-  final openAI = OpenAI.instance.build(
-      token: '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',
-      baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 5)),
-      enableLog: true);
+  String text = '';
 
   // Create a ScrollController to control the scrolling of the ListView
   final ScrollController _scrollController = ScrollController();
@@ -40,7 +40,7 @@ class _TravelFormState extends State<TravelForm> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Travel Planner',
                   style: TextStyle(
                     fontSize: 32.0,
@@ -48,13 +48,38 @@ class _TravelFormState extends State<TravelForm> {
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 TextFormField(
                   keyboardType: TextInputType.text,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'From',
+                    hintStyle: const TextStyle(color: Colors.white),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.all(16.0),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter where you are from';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _from = value!;
+                  },
+                ),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  keyboardType: TextInputType.text,
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Destination',
-                    hintStyle: TextStyle(color: Colors.white),
+                    hintStyle: const TextStyle(color: Colors.white),
                     filled: true,
                     fillColor: Colors.grey[800],
                     border: OutlineInputBorder(
@@ -73,13 +98,13 @@ class _TravelFormState extends State<TravelForm> {
                     _destination = value!;
                   },
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 TextFormField(
                   keyboardType: TextInputType.text,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Duration of travel',
-                    hintStyle: TextStyle(color: Colors.white),
+                    hintStyle: const TextStyle(color: Colors.white),
                     filled: true,
                     fillColor: Colors.grey[800],
                     border: OutlineInputBorder(
@@ -98,17 +123,17 @@ class _TravelFormState extends State<TravelForm> {
                     _duration = value!;
                   },
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 Column(
                   children: [
-                    Text(
+                    const Text(
                       'Budget',
                       style: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white),
                     ),
-                    SizedBox(height: 8.0),
+                    const SizedBox(height: 8.0),
                     Slider(
                       value: _value,
                       min: 1,
@@ -125,25 +150,25 @@ class _TravelFormState extends State<TravelForm> {
                     ),
                   ],
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 SizedBox(
                   width: double.infinity,
                   height: 50.0,
                   child: ElevatedButton(
                     onPressed: _submitForm,
-                    child: Text(
-                      loading ? 'Loading...' : 'SUBMIT',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.0),
                       ),
-                      primary: Colors.blue,
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: Text(
+                      loading ? 'Loading...' : 'SUBMIT',
+                      style: const TextStyle(fontSize: 16.0),
                     ),
                   ),
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 _resultCard(MediaQuery.of(context).size),
               ],
             ),
@@ -166,82 +191,84 @@ class _TravelFormState extends State<TravelForm> {
     }
   }
 
-  void _submitForm() async {
+  void gpt() async {
+    setState(() {
+      loading = true;
+    });
+    final testPrompt =
+        'Consider yourself a travel planner. write a travel itinerary to $_destination from $_from for the duration of $_duration with a $budgetText budget.[null] These are the list of sponsors if any include them in the itinerary. And make sure you have the itinerary only.';
+    //Future.delayed(const Duration(seconds: 40));
+    final testRequest = CompletionRequest(
+      model: ChatGptModel.gpt35Turbo,
+      messages: [
+        Message(
+          role: 'user',
+          content: testPrompt,
+        ),
+      ],
+      maxTokens: 200,
+    );
+    final result = await chatGpt.createChatCompletion(testRequest);
+    print(result!.choices!.first.message!.content.toString());
+    text = result.choices!.first.message!.content.toString();
+    setState(() {
+      loading = false;
+    });
+  }
+
+  void _submitForm() {
     final form = _formKey.currentState;
     if (form!.validate()) {
       form.save();
       // TODO: Implement response logic based on the entered destination and duration
       budgetText = _getValueText();
-      chatComplete(_destination, _duration, budgetText, '');
-      // setState(() {
-      //   loading = true;
-      // });
-      //await Future.delayed(Duration(seconds: 40));
-      // setState(() {
-      //   // loading = false;
-      // });
-      // Scroll to the bottom of the screen to show the response
-      Future.delayed(Duration(milliseconds: 500), () {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 1500),
-          curve: Curves.easeInOut,
-        );
+      setState(() {
+        loading = true;
       });
-      setState(() {});
-    }
-  }
-
-  void chatComplete(String destination, String duration, String budget,
-      String sponsors) async {
-    final request = ChatCompleteText(messages: [
-      Map.of({
-        "role": "user",
-        "content":
-            'Consider yourself a travel planner. write a travel itinerary to $destination for the duration of $duration with a $budget budget.[$sponsors] These are the list of sponsors if any include them in the itinerary. And make sure you have the itinerary only.'
-      })
-    ], maxToken: 200, model: ChatModel.gptTurbo0301);
-
-    responseFuture = await openAI.onChatCompletion(request: request);
-    for (var element in responseFuture!.choices) {
-      print("data -> ${element.message?.content}");
+      gpt();
+      setState(() {
+        loading = false;
+      });
+      // Scroll to the bottom of the screen to show the response
+      Future.delayed(const Duration(milliseconds: 500), () {
+        // _scrollController.animateTo(
+        //   _scrollController.position.maxScrollExtent,
+        //   duration: const Duration(milliseconds: 1500),
+        //   curve: Curves.easeInOut,
+        // );
+      });
     }
   }
 
   Widget _resultCard(Size size) {
-    return FutureBuilder<ChatCTResponse?>(
-        future: Future(() => responseFuture),
-        builder: (context, snapshot) {
-          final text = snapshot.data?.choices.last.message?.content;
-          return Visibility(
-            visible: text.isNull ? false : true,
-            child: Container(
-              // height: MediaQuery.of(context).size.height * 1,
-              // width: MediaQuery.of(context).size.width * 1,
-              child: Expanded(
-                // Wrap the Text widget inside a ListView widget
-                child: ListView(
-                    controller: _scrollController, // Set the controller
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.0),
-                          color: Colors.grey[800],
-                        ),
-                        child: Text(
-                          text ?? 'Loading...',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ]),
-              ),
-            ),
-          );
-        });
+    return Visibility(
+      visible: text.isNotEmpty,
+      child: Container(
+        // height: MediaQuery.of(context).size.height * 1,
+        // width: MediaQuery.of(context).size.width * 1,
+        child: Expanded(
+          // Wrap the Text widget inside a ListView widget
+          child: ListView(
+              controller: _scrollController, // Set the controller
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    color: Colors.grey[800],
+                  ),
+                  child: Text(
+                    text ?? 'Loading...',
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ]),
+        ),
+      ),
+    );
   }
 }

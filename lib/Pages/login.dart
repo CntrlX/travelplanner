@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -23,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Welcome to TravelPlanner',
                   style: TextStyle(
                     fontSize: 32.0,
@@ -31,13 +33,13 @@ class _LoginPageState extends State<LoginPage> {
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 TextFormField(
                   keyboardType: TextInputType.emailAddress,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Email',
-                    hintStyle: TextStyle(color: Colors.white),
+                    hintStyle: const TextStyle(color: Colors.white),
                     filled: true,
                     fillColor: Colors.grey[800],
                     border: OutlineInputBorder(
@@ -56,13 +58,13 @@ class _LoginPageState extends State<LoginPage> {
                     _email = value!;
                   },
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 TextFormField(
                   obscureText: true,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Password',
-                    hintStyle: TextStyle(color: Colors.white),
+                    hintStyle: const TextStyle(color: Colors.white),
                     filled: true,
                     fillColor: Colors.grey[800],
                     border: OutlineInputBorder(
@@ -81,21 +83,20 @@ class _LoginPageState extends State<LoginPage> {
                     _password = value!;
                   },
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 SizedBox(
                   width: double.infinity,
                   height: 50.0,
                   child: ElevatedButton(
                     onPressed: _submitForm,
-                    child: Text(
-                      'LOGIN',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      primary: Colors.blue,
+                      ), backgroundColor: Colors.blue,
+                    ),
+                    child: const Text(
+                      'LOGIN',
+                      style: TextStyle(fontSize: 16.0),
                     ),
                   ),
                 ),
@@ -131,17 +132,17 @@ class _LoginPageState extends State<LoginPage> {
             builder: (BuildContext context) {
               return AlertDialog(
                 backgroundColor: Colors.grey[900],
-                title: Text(
+                title: const Text(
                   'Error',
                   style: TextStyle(color: Colors.white),
                 ),
-                content: Text(
+                content: const Text(
                   'User not found',
                   style: TextStyle(color: Colors.white),
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: Text(
+                    child: const Text(
                       'OK',
                       style: TextStyle(color: Colors.white),
                     ),
@@ -160,17 +161,17 @@ class _LoginPageState extends State<LoginPage> {
             builder: (BuildContext context) {
               return AlertDialog(
                 backgroundColor: Colors.grey[900],
-                title: Text(
+                title: const Text(
                   'Error',
                   style: TextStyle(color: Colors.white),
                 ),
-                content: Text(
+                content: const Text(
                   'Invalid username or password',
                   style: TextStyle(color: Colors.white),
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: Text(
+                    child: const Text(
                       'OK',
                       style: TextStyle(color: Colors.white),
                     ),

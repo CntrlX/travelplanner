@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "926709981503",
+    "project_id": "genesis-82adf",
+    "storage_bucket": "genesis-82adf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926709981503:android:f48afef3cbc20aa2e2f38a",
+        "android_client_info": {
+          "package_name": "com.example.travelplanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "926709981503-u6bnqjv8bce2sfc1u3o1v4j3kr42olnp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBV-B4Bn_-SAi0b6DxbIds2jiFIJmOmz6s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "926709981503-u6bnqjv8bce2sfc1u3o1v4j3kr42olnp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
