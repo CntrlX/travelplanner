@@ -196,7 +196,7 @@ class _TravelFormState extends State<TravelForm> {
       loading = true;
     });
     final testPrompt =
-        'Consider yourself a travel planner. write a travel itinerary to $_destination from $_from for the duration of $_duration with a $budgetText budget.[null] These are the list of sponsors if any include them in the itinerary. And make sure you have the itinerary only and the total estimate budget in indian rupees.';
+        'Consider yourself a travel planner. write a travel itinerary to $_destination from $_from for the duration of $_duration with a $budgetText budget(if it is medium budget the estimate budget should be more than rs 15000) .[null] These are the list of sponsors if any include them in the itinerary. And make sure you have the itinerary only and the total estimate budget in indian rupees.';
     //Future.delayed(const Duration(seconds: 40));
     final testRequest = CompletionRequest(
       model: ChatGptModel.gpt35Turbo,
